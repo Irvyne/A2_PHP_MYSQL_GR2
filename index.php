@@ -10,4 +10,5 @@ $config = include __DIR__.'/config/config.php';
 
 $link = getDatabaseLink($config['database']);
 
-var_dump(getArticles($link));
+$boolean = addArticle($link, 'zff', 'cz', 1, null, 0, 0);
+var_dump($boolean);

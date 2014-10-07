@@ -22,6 +22,12 @@ function getArticles($link)
     return $articles;
 }
 
+/**
+ * @param $link
+ * @param $id
+ *
+ * @return array|null
+ */
 function getArticle($link, $id)
 {
     $sql = 'SELECT * FROM article WHERE id='.mysqli_real_escape_string($link, $id);
@@ -36,13 +42,20 @@ function getArticle($link, $id)
  * @param string $content
  * @param bool   $enabled
  * @param string $image
- * @param int    $category
+ * @param int    $category_id
+ * @param int    $user_id
  * @param array  $tags
- * @param int    $user
+ *
+ * @return bool
  */
-function addArticle($link, $title, $content, $enabled, $image, $category, $tags, $user)
+function addArticle($link, $title, $content, $enabled, $image, $category_id, $user_id, $tags = null)
 {
+    $sql = 'INSERT INTO article (id, title, content, enabled, image, category_id, user_id) VALUES (NULL, ?, ?, ?, ?, ?, ?)';
+    $prepare = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($prepare, 'ssisii', $title, $content, $enabled, $image, $category_id, $user_id);
+    $result = mysqli_stmt_execute($prepare);
 
+    return $result;
 }
 
 function updateArticle($link, $id, array $update)
