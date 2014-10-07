@@ -58,17 +58,35 @@ function addArticle($link, $title, $content, $enabled, $image, $category_id, $us
     return $result;
 }
 
+// $update = ['content' => 'Mon nouveau titre', 'category_id' => 0];
 function updateArticle($link, $id, array $update)
 {
+    $sql = 'UPDATE article SET ';
 
+    $i = 0;
+    foreach ($update as $column => $value) {
+        if ($i > 0) $sql .= ', ';
+        $sql .= $column.'=';
+        if (is_string($value)) $sql .= '"';
+        $sql .= mysqli_real_escape_string($link, $value);
+        if (is_string($value)) $sql .= '"';
+        $i++;
+    }
+
+    $sql .= ' WHERE id='.mysqli_real_escape_string($link, $id);
+    return mysqli_query($link, $sql);
 }
 
 function enableArticle($link, $id, $enabled)
 {
+    $sql = 'UPDATE article SET enabled='.mysqli_real_escape_string($link, $enabled).' WHERE id='.mysqli_real_escape_string($link, $id);
 
+    return mysqli_query($link, $sql);
 }
 
 function removeArticle($link, $id)
 {
-    $sql = '';
+    $sql = 'DELETE FROM article WHERE id='.mysqli_real_escape_string($link, $id);
+
+    return mysqli_query($link, $sql);
 }

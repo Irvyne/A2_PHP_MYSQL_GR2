@@ -11,4 +11,5 @@ $config = include __DIR__.'/config/config.php';
 $link = getDatabaseLink($config['database']);
 
 $boolean = addArticle($link, 'zff', 'cz', 1, null, 0, 0);
-var_dump($boolean);
+
+var_dump(updateArticle($link, 5, ['content' => 'Mon nouveau titre', 'category_id' => 0]));
