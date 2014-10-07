@@ -70,5 +70,5 @@ function enableArticle($link, $id, $enabled)
 
 function removeArticle($link, $id)
 {
-
+    $sql = '';
 }
