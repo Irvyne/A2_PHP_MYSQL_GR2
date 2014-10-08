@@ -24,11 +24,11 @@ if (!empty($_POST) && isset($_POST['submitArticle'])) {
         $title = $_POST['title'];
         $content = $_POST['content'];
         $enabled = isset($_POST['enabled']) ? true : false;
-        $image = isset($_POST['image']) ? $_POST['image'] : null;
+        $image = isset($_FILES['image']) ? $_FILES['image'] : null;
         $categoryId = (int) $_POST['category'];
         $tagsId = isset($_POST['tags']) ? $_POST['tags'] : null;
 
-        var_dump($_FILES);
+        var_dump($_FILES['image']);
 
         $boolean = addArticle($link, $title, $content, $enabled, $image, $categoryId, 1, $tagsId);
         var_dump($boolean);
