@@ -10,6 +10,29 @@ $config = include __DIR__.'/config/config.php';
 
 $link = getDatabaseLink($config['database']);
 
-$boolean = addArticle($link, 'zff', 'cz', 1, null, 0, 0);
+$errors = [];
 
-var_dump(updateArticle($link, 5, ['content' => 'Mon nouveau titre', 'category_id' => 0]));
+if (!empty($_POST) && isset($_POST['submitArticle'])) {
+    $mandatory = ['title', 'content', 'category'];
+    foreach($mandatory as $name) {
+        if (empty($_POST[$name])) {
+            $errors[] = $name.' cannot be empty!';
+        }
+    }
+
+    if (0 === sizeof($errors)) {
+        $title = $_POST['title'];
+        $content = $_POST['content'];
+        $enabled = isset($_POST['enabled']) ? true : false;
+        $image = isset($_POST['image']) ? $_POST['image'] : null;
+        $categoryId = (int) $_POST['category'];
+        $tagsId = isset($_POST['tags']) ? $_POST['tags'] : null;
+
+        var_dump($_FILES);
+
+        $boolean = addArticle($link, $title, $content, $enabled, $image, $categoryId, 1, $tagsId);
+        var_dump($boolean);
+    }
+}
+
+include __DIR__.'/template/form.php';
