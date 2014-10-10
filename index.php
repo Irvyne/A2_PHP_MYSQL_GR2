@@ -35,4 +35,6 @@ if (!empty($_POST) && isset($_POST['submitArticle'])) {
     }
 }
 
+removeImageFile(__DIR__.'/uploads/baracktocat.jpg');
+
 include __DIR__.'/template/form.php';

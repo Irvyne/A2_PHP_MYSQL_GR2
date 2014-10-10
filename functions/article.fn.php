@@ -97,6 +97,9 @@ function enableArticle($link, $id, $enabled)
 
 function removeArticle($link, $id)
 {
+    $sqlImage = 'SELECT image FROM article WHERE id='.mysqli_real_escape_string($link, $id);
+
+
     $sql = 'DELETE FROM article WHERE id='.mysqli_real_escape_string($link, $id);
 
     return mysqli_query($link, $sql);
@@ -112,7 +115,6 @@ function saveImageFile(array $image = null) {
         $allowedExtensions = ['jpeg', 'jpg', 'png', 'gif'];
 
         $salt = sha1(uniqid(mt_rand(), true));
-        // TODO changer le nom de l'image qui va être uploadé
         $extension = pathinfo($image['name'], PATHINFO_EXTENSION);
         $imageName = 'uploads/'.$salt.'.'.$extension;
         if (in_array($extension, $allowedExtensions))
@@ -125,7 +127,9 @@ function saveImageFile(array $image = null) {
     return $imageName;
 }
 
-//TODO is_file() unlink()
 function removeImageFile($fileName = null) {
-
+    if ($fileName && is_file($fileName)) {
+        return unlink($fileName);
+    }
+    return null;
 }
