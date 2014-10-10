@@ -4,11 +4,7 @@
  * This code is under MIT licence (see https://github.com/Irvyne/license/blob/master/MIT.md)
  */
 
-include __DIR__.'/functions/database.fn.php';
-include __DIR__.'/functions/article.fn.php';
-$config = include __DIR__.'/config/config.php';
-
-$link = getDatabaseLink($config['database']);
+require __DIR__.'/_header.php';
 
 $errors = [];
 
@@ -35,6 +31,6 @@ if (!empty($_POST) && isset($_POST['submitArticle'])) {
     }
 }
 
-removeArticle($link, 36);
+require __DIR__.'/_footer.php';
 
 include __DIR__.'/template/form.php';

@@ -12,3 +12,7 @@ function getDatabaseLink(array $config) {
         $config['dbname']
     );
 }
+
+function closeDatabaseLink($link) {
+    return mysqli_close($link);
+}
