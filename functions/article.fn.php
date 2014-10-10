@@ -8,6 +8,8 @@
  * @param $link
  *
  * @return array
+ *
+ * TRICK keyword SQL "LIMIT"
  */
 function getArticles($link)
 {
