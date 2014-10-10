@@ -98,11 +98,17 @@ function enableArticle($link, $id, $enabled)
 function removeArticle($link, $id)
 {
     $sqlImage = 'SELECT image FROM article WHERE id='.mysqli_real_escape_string($link, $id);
-
+    $resultImage = mysqli_query($link, $sqlImage);
+    $imageName = __DIR__.'/../'.mysqli_fetch_assoc($resultImage)['image'];
 
     $sql = 'DELETE FROM article WHERE id='.mysqli_real_escape_string($link, $id);
+    $successfullyRemoved = mysqli_query($link, $sql);
 
-    return mysqli_query($link, $sql);
+    if ($successfullyRemoved) {
+        removeImageFile($imageName);
+    }
+
+    return $successfullyRemoved;
 }
 
 /**
