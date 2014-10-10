@@ -127,6 +127,11 @@ function saveImageFile(array $image = null) {
     return $imageName;
 }
 
+/**
+ * @param null $fileName
+ *
+ * @return bool|null
+ */
 function removeImageFile($fileName = null) {
     if ($fileName && is_file($fileName)) {
         return unlink($fileName);
