@@ -8,12 +8,60 @@
  * @param $link
  *
  * @return array
- *
- * TRICK keyword SQL "LIMIT"
  */
-function getArticles($link)
+function getArticles($link, $userId = null, $from = null, $number = null)
 {
-    $sql    = 'SELECT * FROM article';
+    $sql = 'SELECT * FROM article';
+
+    if (null !== $userId) {
+        $sql .= ' WHERE user_id = '.(int)$userId;
+    }
+    if (null !== $from && null !== $number) {
+        $sql .= ' LIMIT '.(int)$from.', '.(int)$number;
+    } elseif (null !== $from) {
+        $sql .= ' LIMIT '.(int)$from.', 0';
+    } elseif (null !== $number) {
+        $sql .= ' LIMIT '.(int)$number;
+    }
+
+    $result = mysqli_query($link, $sql);
+
+    $articles = [];
+    while ($article = mysqli_fetch_assoc($result)) {
+        $articles[] = $article;
+    }
+
+    return $articles;
+}
+
+/**
+ * @param $link
+ * @param $categoryId
+ *
+ * @return array
+ */
+function getArticlesFromCategory($link, $categoryId)
+{
+    $sql = 'SELECT * FROM article WHERE category_id='.mysqli_real_escape_string($link, $categoryId);
+    $result = mysqli_query($link, $sql);
+
+    $articles = [];
+    while ($article = mysqli_fetch_assoc($result)) {
+        $articles[] = $article;
+    }
+
+    return $articles;
+}
+
+/**
+ * @param $link
+ * @param $tagId
+ *
+ * @return array
+ */
+function getArticlesFromTag($link, $tagId)
+{
+    $sql = 'SELECT * FROM article JOIN article_tag at ON at.article_id='.mysqli_real_escape_string($link, $tagId);
     $result = mysqli_query($link, $sql);
 
     $articles = [];
@@ -52,19 +100,27 @@ function getArticle($link, $id)
  */
 function addArticle($link, $title, $content, $enabled, array $image = null, $category_id, $user_id, $tags = null)
 {
-    $imageName = saveImageFile($image);
-    $sql     = 'INSERT INTO article (id, title, content, enabled, image, category_id, user_id) VALUES (NULL, ?, ?, ?, ?, ?, ?)';
-    $prepare = mysqli_prepare($link, $sql);
+    $imageName = saveArticleImageFile($image);
+    $sql       = 'INSERT INTO article (id, title, content, enabled, created_at, updated_at, image, category_id, user_id) VALUES (NULL, ?, ?, ?, NOW(), NOW(), ?, ?, ?)';
+    $prepare   = mysqli_prepare($link, $sql);
     mysqli_stmt_bind_param($prepare, 'ssisii', $title, $content, $enabled, $imageName, $category_id, $user_id);
     $result = mysqli_stmt_execute($prepare);
 
     return $result;
 }
 
-// $update = ['content' => 'Mon nouveau titre', 'category_id' => 0];
+/**
+ * @param       $link
+ * @param       $id
+ * @param array $update
+ *
+ * @return bool|mysqli_result
+ */
 function updateArticle($link, $id, array $update)
 {
     $sql = 'UPDATE article SET ';
+
+    $update = array_merge($update, ['updated_at' => 'NOW()']);
 
     $i = 0;
     foreach ($update as $column => $value) {
@@ -84,9 +140,16 @@ function updateArticle($link, $id, array $update)
 
     $sql .= ' WHERE id='.mysqli_real_escape_string($link, $id);
 
-    return mysqli_query($link, $sql);
+    mysqli_query($link, $sql);
 }
 
+/**
+ * @param $link
+ * @param $id
+ * @param $enabled
+ *
+ * @return bool|mysqli_result
+ */
 function enableArticle($link, $id, $enabled)
 {
     $sql = 'UPDATE article SET enabled='.mysqli_real_escape_string(
@@ -97,20 +160,39 @@ function enableArticle($link, $id, $enabled)
     return mysqli_query($link, $sql);
 }
 
+/**
+ * @param $link
+ * @param $id
+ *
+ * @return bool|mysqli_result
+ */
 function removeArticle($link, $id)
 {
-    $sqlImage = 'SELECT image FROM article WHERE id='.mysqli_real_escape_string($link, $id);
+    $sqlImage    = 'SELECT image FROM article WHERE id='.mysqli_real_escape_string($link, $id);
     $resultImage = mysqli_query($link, $sqlImage);
-    $imageName = __DIR__.'/../'.mysqli_fetch_assoc($resultImage)['image'];
+    $imageName   = __DIR__.'/../'.mysqli_fetch_assoc($resultImage)['image'];
 
-    $sql = 'DELETE FROM article WHERE id='.mysqli_real_escape_string($link, $id);
+    $sql                 = 'DELETE FROM article WHERE id='.mysqli_real_escape_string($link, $id);
     $successfullyRemoved = mysqli_query($link, $sql);
 
     if ($successfullyRemoved) {
-        removeImageFile($imageName);
+        removeArticleImageFile($imageName);
     }
 
     return $successfullyRemoved;
+}
+
+/**
+ * @param $link
+ *
+ * @return int
+ */
+function countArticles($link)
+{
+    $sql    = 'SELECT COUNT(*) AS nb FROM article';
+    $result = mysqli_query($link, $sql);
+
+    return (int)mysqli_fetch_assoc($result)['nb'];
 }
 
 /**
@@ -118,19 +200,22 @@ function removeArticle($link, $id)
  *
  * @return null|string
  */
-function saveImageFile(array $image = null) {
+function saveArticleImageFile(array $image = null)
+{
     if (null !== $image && 0 === $image['error']) {
         $allowedExtensions = ['jpeg', 'jpg', 'png', 'gif'];
 
-        $salt = sha1(uniqid(mt_rand(), true));
+        $salt      = sha1(uniqid(mt_rand(), true));
         $extension = pathinfo($image['name'], PATHINFO_EXTENSION);
-        $imageName = 'uploads/'.$salt.'.'.$extension;
-        if (in_array($extension, $allowedExtensions))
+        $imageName = 'uploads/article/'.$salt.'.'.$extension;
+        if (in_array($extension, $allowedExtensions)) {
             move_uploaded_file($image['tmp_name'], __DIR__.'/../'.$imageName);
-        else
+        } else {
             $imageName = null;
-    } else
+        }
+    } else {
         $imageName = null;
+    }
 
     return $imageName;
 }
@@ -140,9 +225,24 @@ function saveImageFile(array $image = null) {
  *
  * @return bool|null
  */
-function removeImageFile($fileName = null) {
+function removeArticleImageFile($fileName = null)
+{
     if ($fileName && is_file($fileName)) {
         return unlink($fileName);
     }
+
     return null;
+}
+
+/**
+ * @param $string
+ * @param int $length
+ * @return string
+ */
+function getExcerpt($string, $length = 300) {
+    $excerpt = substr($string, 0, $length);
+    if (strlen($string) > $length) {
+        $excerpt .= '...';
+    }
+    return $excerpt;
 }

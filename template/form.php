@@ -40,10 +40,12 @@
 
     <label for="category">Category: </label>
     <select id="category" name="category" required>
-        <option value="1">Animals</option>
-        <option value="2">Food</option>
-        <option value="3">Cars</option>
-        <option value="4">News</option>
+        <?php
+        $categories = getCategories($link);
+        foreach ($categories as $category) {
+            echo '<option value="'.$category['id'].'">'.$category['name'].'</option>';
+        }
+        ?>
     </select>
     <br>
 

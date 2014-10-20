@@ -4,9 +4,10 @@
  * This code is under MIT licence (see https://github.com/Irvyne/license/blob/master/MIT.md)
  */
 
-$a = true;
+require __DIR__.'/_header-admin.php';
 
-echo ('' === $a) ? 'TRUE' : 'FALSE';
+$tags = getTags($link);
 
+include __DIR__.'/template/admin-tag-list.php';
 
-echo PHP_EOL;
+require __DIR__.'/_footer.php';

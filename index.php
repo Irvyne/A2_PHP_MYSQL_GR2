@@ -6,31 +6,20 @@
 
 require __DIR__.'/_header.php';
 
-$errors = [];
+$perPage = 6;
+$total = countArticles($link);
+$currentPage = !empty($_GET['p']) ? (int)$_GET['p'] : 0;
+$lastPage = (int)floor($total/$perPage);
 
-if (!empty($_POST) && isset($_POST['submitArticle'])) {
-    $mandatory = ['title', 'content', 'category'];
-    foreach($mandatory as $name) {
-        if (empty($_POST[$name])) {
-            $errors[] = $name.' cannot be empty!';
-        }
-    }
-
-    if (0 === sizeof($errors)) {
-        $title = $_POST['title'];
-        $content = $_POST['content'];
-        $enabled = isset($_POST['enabled']) ? true : false;
-        $image = isset($_FILES['image']) ? $_FILES['image'] : null;
-        $categoryId = (int) $_POST['category'];
-        $tagsId = isset($_POST['tags']) ? $_POST['tags'] : null;
-
-        var_dump($_FILES['image']);
-
-        $boolean = addArticle($link, $title, $content, $enabled, $image, $categoryId, 1, $tagsId);
-        var_dump($boolean);
-    }
+if (0 >= $currentPage) {
+    header('Location: index.php?p=1');
+}
+if ($currentPage > ($lastPage+1)) {
+    header('Location: index.php?p='.($lastPage+1));
 }
 
-require __DIR__.'/_footer.php';
+$articles = getArticles($link, null, ($currentPage-1)*6, $perPage);
 
-include __DIR__.'/template/form.php';
+include __DIR__.'/template/articles.php';
+
+require __DIR__.'/_footer.php';
