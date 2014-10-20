@@ -27,38 +27,16 @@ foreach ($articles as $article) {
 }
 ?>
 
-<?php if (isset($currentPage)) { ?>
-    <div id="pagination" class="col-md-12 text-center">
-        <ul class="pagination pagination-lg">
-            <?php
-            $i = 0;
-            while ($i <= $lastPage) {
-                $currentI = $i+1;
+<ul class="pagination">
+    <li <?php echo 1 == $currentPage ? 'class="disabled"' : null; ?>><a href="index.php?p=<?php echo $currentPage-1; ?>">&leftarrow;</a></li>
 
-                if (1 === $currentI) {
-                    if ($currentPage === 1)
-                        echo '<li class="disabled"><a href="#">«</a></li>';
-                    else
-                        echo '<li><a href="?p='.($currentPage-1).'">«</a></li>';
-                }
+    <?php $i = 1; ?>
+    <?php while ($i <= $nbPages) { ?>
+        <li <?php echo $i == $currentPage ? 'class="active"' : null; ?>><a href="index.php?p=<?php echo $i; ?>"><?php echo $i; ?></a></li>
+        <?php $i++; ?>
+    <?php } ?>
 
-                if ($currentI === $currentPage)
-                    echo '<li class="active"><a href="?p='.$currentI.'">'.$currentI.'</a></li>';
-                else
-                    echo '<li><a href="?p='.$currentI.'">'.$currentI.'</a></li>';
-
-                if ($i === $lastPage) {
-                    if ($currentPage === ($lastPage+1))
-                        echo '<li class="disabled"><a href="#">»</a></li>';
-                    else
-                        echo '<li><a href="?p='.($currentPage+1).'">»</a></li>';
-                }
-
-                $i++;
-            }
-            ?>
-        </ul>
-    </div>
-<?php } ?>
+    <li <?php echo $nbPages == $currentPage ? 'class="disabled"' : null; ?>><a href="index.php?p=<?php echo $currentPage+1; ?>">&rightarrow;</a></li>
+</ul>
 
 <?php include __DIR__.'/_footer.php'; ?>

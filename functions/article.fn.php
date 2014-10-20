@@ -31,7 +31,7 @@ function getArticles($link, $userId = null, $from = null, $number = null)
     }
 
     // LIMIT 5
-    // LIMIT 5, 10
+    // LIMIT 12, 6
     // LIMIT 5, 0
 
     $result = mysqli_query($link, $sql);
