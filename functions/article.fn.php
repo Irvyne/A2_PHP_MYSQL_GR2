@@ -5,17 +5,23 @@
  */
 
 /**
- * @param $link
+ * @param      $link
+ *
+ * @param null $userId
+ * @param null $from
+ * @param null $number
  *
  * @return array
  */
 function getArticles($link, $userId = null, $from = null, $number = null)
 {
+    //TODO https://github.com/Irvyne/A2_PHP_MYSQL_GR2
     $sql = 'SELECT * FROM article';
 
     if (null !== $userId) {
         $sql .= ' WHERE user_id = '.(int)$userId;
     }
+
     if (null !== $from && null !== $number) {
         $sql .= ' LIMIT '.(int)$from.', '.(int)$number;
     } elseif (null !== $from) {
@@ -23,6 +29,10 @@ function getArticles($link, $userId = null, $from = null, $number = null)
     } elseif (null !== $number) {
         $sql .= ' LIMIT '.(int)$number;
     }
+
+    // LIMIT 5
+    // LIMIT 5, 10
+    // LIMIT 5, 0
 
     $result = mysqli_query($link, $sql);
 
